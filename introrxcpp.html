@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>No raw std::thread! - Live Tweet Analysis in C++</title>
+    <title>Introduction to ReactiveX in C++ (rxcpp)</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="./fonts.css"/>
     <link rel="stylesheet" href="./mermaid.forest.css">
@@ -127,7 +127,7 @@
     <textarea id="source">
 
 layout: true
-<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/norawthread](https://kirkshoop.github.io/norawthread)]</span><span>.center[C++Now 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
+<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/introductionToRxcpp](https://kirkshoop.github.io/introductionToRxcpp)]</span><span>.center[CERN 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
 
 ---
 
@@ -135,10 +135,10 @@ class: middle
 
 .center[
 
-# No raw std::thread!
+# Introduction to ReactiveX in C++ (rxcpp)
 
 .accent[
-### Live Tweet Analysis in C++
+### algorithms for values distributed in time
 ]
 
 ]
@@ -148,91 +148,6 @@ class: middle
 ???
 
 > * 
-
----
-
-.center[
-.image-80[
-![Sean Parent](content/seanparent.png)
-]
-
-.accent[C++ Seasoning
-]
-
-[https://channel9.msdn.com/Events/GoingNative/2013/Cpp-Seasoning](https://channel9.msdn.com/Events/GoingNative/2013/Cpp-Seasoning)
-
-]
-
-???
-
-> * In 2013, I attended Sean Parent's C++ Seasoning talk at Going Native where he advocated for having no raw for loops 
-in code. 
-
----
-
-.split-50[
-
-.column[
-.center[
-
-## .accent[Raw Loop]
-
-![raw loop](content/rawloop.png)
-]
-]
-
-.column[
-.center[
-
-## .accent[Algorithms]
-
-![algorithms](content/norawloop.png)
-]
-]
-
-]
-
-???
-
-> * One of the things Sean said was that when reviewing code he would try to find the algorithms 
-that each for loop was reimplementing - often poorly - and ask for the loop to be replaced by the algorithms.
-
----
-
-.center[
-.image-70[
-![no raw async primitives](content/norawasyncprimitives.png)
-]
-]
-
-???
-
-> * Later in the talk Sean added another goal - no raw syncronization primitives.
-
----
-
-.center[
-.image-70[
-![primitive technology](content/primitivetechnology.gif)
-]
-
-.accent[primitives are mezmerizing and painful
-]
-
-[https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA](https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA)
-
-]
-
-
-???
-
-> * these videos are mesmerizing to watch and I yearn to build some of these things
-> * I expect that we all yearn to write an OS or a language or a lock-free queue
-> * however, the time and cuts and blisters and pain mean that this is not the right way to build a house commercially.
-> * there is a reason to write C++ and use a linker to produce the machine code
-> * there is a reason to use STL and algorithms and libraries written by others
-> * assembly & intrinsics are the wrong abstractions.
-> * atomics, thread, async, mutex, condition_variable, promise, future
 
 ---
 
@@ -246,149 +161,10 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 
 ???
 
-> * For 10 years I searched for the right abstraction to write responsive apps without sync primitives
-> * I built a rudimentary Sender/Receiver pattern to stream xml+zip documents in Windows
-> * A co-worker on that project later pointed me to Rx
-> * I saw the pattern completed and used to build algorithms
-> * It was like the first time I saw the STL or the first time I read _Modern C++ Design_
-> * I built Rx in c++ because I wanted to build apps using Rx
 > * twitter stream api
 > * sample of live tweets.
 > * sentiment analysis 
 > * words (wanna, love)
-
----
-
-# raw promises and callbacks
-
-???
-
-promise - shleping one value at a time vs piplineing
-callbacks - hard to compose, tends to reimplement algorithms
-
-> * 
-
----
-
-# raw promises
-
-```cpp
-each(objProc.begin(), objProc.end(), 
-    [&](It<string> c, It<string> e) {
-        //
-        // split chunks and group into tweets
-        string chunk = partial + *c;
-        partial.clear();
-        auto chunks = split(chunk, "\r\n");
-        string line;
-        for (auto& chunk : chunks){
-            if (!isEndOfTweet(chunk)) {
-                line = chunk;
-                partial = chunk;
-                continue;
-            }
-            partial.clear();
-            parseline(line);
-        }
-    });
-```
-
-???
-
-> * each will map to for-await
-> * for-await will over-serialize
-> * new promise created for each value
-
----
-
-# raw callbacks
-
-```cpp
-void parseline(const string& line) {
-    try {
-        auto text = tweettext(json::parse(line));
-        auto words = splitwords(text);
-
-        //
-        // publish tweets - multicast
-        for(auto& f : handlers) {
-            f(text, words);
-        }
-    } catch (const exception& ex){
-        cerr << ex.what() << endl;
-    }
-}
-```
-
-???
-
-> * each tweet is parsed and passed to all the handlers
-> * callbacks are harder to compose 
-> * callback missing lifetime and procrastination
-
----
-
-.split-50[
-
-.column[
-
-# promise per value
-
-```cpp
-for (int i = 0; i < 10000000; i++) {
-    std::promise<unit> ready;
-    ready.set_value(unit());
-    auto isready = ready.get_future();
-    if (isready.wait_for(0ms) == timeout) {
-        isready.wait();
-    }
-}
-```
-
-.accent[**output**
-]
-
-```sh
-loop future<unit>   : 
-    10,000,000 on_next calls, 
-    3018ms elapsed 
-    3,313,450 ops/sec
-```
-
-]
-
-.column[
-
-# subscription
-
-```cpp
-auto o = rx::make_subscriber<int>(
-    [&c](int){++c;},
-    [](std::exception_ptr){abort();});
-
-for (int i = 0; i < 10000000; i++) {
-    o.on_next(i);
-}
-o.on_completed();
-```
-
-.accent[**output**
-]
-
-```sh
-loop -> subscriber  : 
-    10,000,000 on_next calls,   
-    17ms elapsed 
-    588,235,000 ops/sec
-```
-
-]
-
-]
-???
-
-> * async lifetimes are expensive
-> * avoid using async lifetime per value 
 
 ---
 
@@ -398,8 +174,8 @@ loop -> subscriber  :
 - .accent[### write an algorithm]
 - .accent[### virtuous procrastination]
 - .accent[### opt-in thread-safety]
+- .accent[### delegate task execution]
 - .accent[### adapt existing sources]
-- .accent[### algorithmic trancendence]
 
 ???
 
@@ -1578,766 +1354,12 @@ __range-v3__ zips the tweet and sentiment vectors to match the tweet with the se
 
 <br/>
 <br/>
-### .accent[__next >>__] adapt asyc sources
+### .accent[__next >>__] delegate task execution
 
 ]
 ]
 
 ]
-
-???
-
-> * 
-
----
-
-background-image: url(content/drop%20cam.gif)
-
-# adapt async sources
-
-???
-
-> * 
-
----
-
-# adapt async sources - http requests using libcurl
-
---
-
-- .accent[
-### `curl_multi_perform` supports multiplexing requests on a thread]
-
---
-
-- .accent[
-### all the calls to curl must be made from that thread]
-
---
-
-- .accent[
-### completion and results must be delivered to the matching request]
-
-???
-
-> * 
-
----
-
-# adapt async sources - http requests using libcurl
-
-```
-auto worker = create<CURLMsg*>([](subscriber<CURLMsg*> out){
-    while(out.is_subscribed()) {
-      `curl_multi_perform`(curlm, /*. . .*/);
-      for(;;) {
-        CURLMsg *message = nullptr;
-        message = `curl_multi_info_read`(curlm, /*. . .*/);
-        out.on_next(message);
-        if (!!message /*. . .*/) { continue; }
-        break;
-      }
-      int handlecount = 0;
-      `curl_multi_wait`(curlm, nullptr, 0, 500, &handlecount);
-    }
-    out.on_completed();
-  }) |
-  subscribe_on(`httpthread`) |
-  publish() | connect_forever(); // share
-```
-
-???
-
-> * 
-
----
-
-# adapt async sources - http requests using libcurl
-
-```
-auto worker = create<CURLMsg*>([](subscriber<CURLMsg*> out){
-    while(out.`is_subscribed`()) {
-      curl_multi_perform(curlm, /*. . .*/);
-      for(;;) {
-        CURLMsg *message = nullptr;
-        message = curl_multi_info_read(curlm, /*. . .*/);
-        out.`on_next`(message);
-        if (!!message /*. . .*/) { continue; }
-        break;
-      }
-      int handlecount = 0;
-      curl_multi_wait(curlm, nullptr, 0, 500, &handlecount);
-    }
-    out.`on_completed`();
-  }) |
-  subscribe_on(httpthread) |
-  publish() | connect_forever(); // share
-```
-
-???
-
-> * 
-
----
-
-# adapt async sources - http requests using libcurl
-
-to create an http request, use `worker` observable to run the curl api calls on the httpthread.
-
-.split-50[
-.column[
-
-.accent[
-subscribe to http request]
-
-```
-worker
-  | take(1)
-  | tap([] (CURLMsg*){
-    auto curl = curl_easy_init();
-    curl_easy_setopt(curl, 
-      CURLOPT_URL, url.c_str());
-    // . . . 
-    curl_multi_add_handle(curlm, curl);
-    //
-  })
-  | subscribe();
-```
-]
-
-.column[
-
-.accent[
-unsubscribe http request (cancel)]
-
-```
-worker
-  | take(1)
-  | tap([] (CURLMsg*){
-    //
-    //
-    //
-    //
-    curl_multi_remove_handle(curlm, curl);
-    curl_easy_cleanup(curl);
-  })
-  | subscribe();
-```
-
-]
-]
-
-???
-
-> * 
-
----
-
-.split-60[
-.column[
-
-![](content/adapt async sources-COMPLETED-green.svg)
-
-- .accent[
-## adapted libcurl to rxcpp]
-
-- .accent[
-## built __polling loop__ to adapt libcurl to rxcpp]
-
-- .accent[
-## __callback__, __future__, __completion port__, etc.. patterns can also be adapted to rxcpp]
-
-]
-
-.column[
-.right[
-.image-50[
-![](content/drop cam.gif)
-]
-
-<br/>
-<br/>
-### .accent[__next >>__] algorithmic trancendence
-
-]
-]
-
-]
-
-???
-
-> * 
-
----
-
-# algorithmic trancendence
-
-.center[
-.image-40[
-![](content/trancendence.gif)
-]
-]
-
-???
-
-> * .accent[Algorithms] transcend .accent[Languages]
-
----
-
-## learn algorithms once, use them in any Language
-
-.split-50[
-.column[
-
-*   .accent[Java]: [https://github.com/ReactiveX/RxJava](https://github.com/ReactiveX/RxJava)
-*   .accent[JavaScript]: [https://github.com/Reactive-Extensions/RxJS](https://github.com/Reactive-Extensions/RxJS), [https://github.com/ReactiveX/RxJS](https://github.com/ReactiveX/RxJS)
-*   .accent[C#]: [https://github.com/Reactive-Extensions/Rx.NET](https://github.com/Reactive-Extensions/Rx.NET)
-*   .accent[C#(Unity)]: [https://github.com/neuecc/UniRx](https://github.com/neuecc/UniRx)
-*   .accent[Scala]: [https://github.com/ReactiveX/RxScala](https://github.com/ReactiveX/RxScala)
-*   .accent[Clojure]: [https://github.com/ReactiveX/RxClojure](https://github.com/ReactiveX/RxClojure)
-*   .accent[C++]: [https://github.com/Reactive-Extensions/RxCpp](https://github.com/Reactive-Extensions/RxCpp)
-*   .accent[Lua]: [https://github.com/bjornbytes/RxLua](https://github.com/bjornbytes/RxLua)
-*   .accent[Ruby]: [https://github.com/Reactive-Extensions/Rx.rb](https://github.com/Reactive-Extensions/Rx.rb)
-
-]
-
-.column[
-
-*   .accent[Python]: [https://github.com/ReactiveX/RxPY](https://github.com/ReactiveX/RxPY)
-*   .accent[Go]: [https://github.com/ReactiveX/RxGo](https://github.com/ReactiveX/RxGo)
-*   .accent[Groovy]: [https://github.com/ReactiveX/RxGroovy](https://github.com/ReactiveX/RxGroovy)
-*   .accent[JRuby]: [https://github.com/ReactiveX/RxJRuby](https://github.com/ReactiveX/RxJRuby)
-*   .accent[Kotlin]: [https://github.com/ReactiveX/RxKotlin](https://github.com/ReactiveX/RxKotlin)
-*   .accent[Swift]: [https://github.com/kzaher/RxSwift](https://github.com/kzaher/RxSwift)
-*   .accent[PHP]: [https://github.com/ReactiveX/RxPHP](https://github.com/ReactiveX/RxPHP)
-*   .accent[Elixir]: [https://github.com/alfert/reaxive](https://github.com/alfert/reaxive)
-*   .accent[Dart]: [https://github.com/ReactiveX/rxdart](https://github.com/ReactiveX/rxdart)
-
-]
-]
-
-???
-
-> * 
-
----
-
-# use algorithms to solve a problem once, reuse in any Language
-
---
-
-.accent[__parsing messages out of chunks of characters__]
-
-[http://stackoverflow.com/questions/31208418/split-iobservablebyte-to-characters-then-to-line](http://stackoverflow.com/questions/31208418/split-iobservablebyte-to-characters-then-to-line)
-
-> I receive events with a `byte[]`, this array might contains part of a line, multiple lines or one line. What I want is find a way to have an `IObservable` of Line so `IObservable<String>`, where each element of the sequence will be a line.
-
---
-
-[https://dev.twitter.com/streaming/overview/processing](https://dev.twitter.com/streaming/overview/processing)
-
-> The body of a streaming API response consists of a series of newline-delimited messages, where “newline” is considered to be `\r\n` (in hex, `0x0D 0x0A`) and “message” is a JSON encoded data structure or a blank line.
-<br/><br/>
-> Note that Tweet content may sometimes contain linefeed `\n` characters, but will not contain carriage returns `\r`. Therefore, to make sure you get whole message payloads, break out each message on `\r\n` boundaries, as `\n` may occur in the middle of a message.
-
-???
-
-> * 
-
----
-
-.split-50[
-.column[
-
-.accent[__C#__] 
-
-from the StackOverflow answer
-
-```cs
-var strings = bytes.
-  Select(arr => 
-    (Regex.Split(
-        Encoding.Default.
-            GetString(arr, 0, arr.Length - 1), 
-        "(\r)")).
-    Where(s=> s.Length != 0).
-    ToObservable()).
-  Concat().
-  Publish().
-  RefCount();
-
-var closes = strings.
-    Where(s => s.EndsWith("\r"));
-
-var linewindows = strings.Window(closes);
-
-
-var lines = linewindows.SelectMany(w => 
-    w.Aggregate((l, r) => l + r));
-```
-]
-
-.column[
-
-.accent[__C++__] 
-
-code to extract tweets in the twitter app
-
-```cpp
-auto strings = chunks |
-    concat_map([](const string& s){
-        auto splits = split(s, "\r\n");
-        return iterate(move(splits));
-    }) |
-    filter([](const string& s){
-        return !s.empty();
-    }) |
-    publish() |
-    ref_count();
-
-auto closes = strings |
-    filter(isEndOfTweet);
-
-auto linewindows = strings |
-    window_toggle(closes | start_with(0), 
-        [=](int){return closes;});
-
-auto lines = linewindows |
-    flat_map([](const observable<string>& w) {
-        return w | start_with("") | sum();
-    });
-```
-
-]
-]
-
-???
-
-> * 
-
----
-
-## sending telemetry from client page
-
-```ts
-var telemetry = new Rx.Subject<TelemetryData>();
-```
-
---
-
-```ts
-export function writeEntry(data: ITelemetryData) {
-    telemetry.onNext(new TelemetryData(data));
-}
-```
-
-???
-
-> * 
-
----
-
-## sending telemetry from client page
-
-```ts
-var pending: { bodysize: number, entries: TelemetryData[]; } = {
-    bodysize: 0,
-    entries: []
-};
-```
-
---
-
-```ts
-var maxTimeTrigger = Rx.Observable.interval(60 * 1000);
-```
-
---
-
-```ts
-var maxCountTrigger = telemetry.filter(e => pending.entries.length >= 50).map(e => -1);
-```
-
---
-
-```ts
-var maxSizeTrigger = telemetry.filter(e => pending.bodysize >= 20000).map(e => -2);
-```
-
---
-
-```ts
-var boundaries = Rx.Observable.merge(maxTimeTrigger, maxCountTrigger, maxSizeTrigger).share();
-```
-
-???
-
-> * 
-
----
-```ts
-export var telemetryUpdate$ = telemetry.
-    window(boundaries.startWith(-1), () => boundaries).
-```
-
---
-
-```ts
-    flatMap(w => w.reduce((data, entry) => {
-        data.bodysize += JSON.stringify(entry).length;
-        data.entries.push(entry);
-        return data;
-    }, pending)).
-    filter(data => data.entries.length !== 0).
-```
-
---
-
-```ts
-    flatMap(data => Rx.Observable.
-        fromPromise(flushTelemetry(FlushRequest.Async)).
-```
-
---
-
-```ts
-    // exponential backoff on failure
-        retryWhen(errors => errors.
-            scan((c, e) => c + 1, 0).
-            flatMap(i => Rx.Observable.timer(Math.pow(5, i) * 1000))).
-```
-
---
-
-```ts
-    // give up
-        timeout(10 * 60 * 1000, Rx.Observable.empty())).
-```
-
---
-
-```ts
-    retry();
-
-var subscription = telemetryUpdate$.subscribe();
-```
-
----
-
-.split-60[
-.column[
-
-![](content/algorithmic trancendence-COMPLETED-green.svg)
-
-- .accent[
-## showed __languages__ with ReactiveX implementations]
-
-- .accent[
-## built __message parsing__ in C# and C++]
-
-- .accent[
-## built __request batching__ in Javascript and C++]
-
-]
-
-.column[
-.right[
-![](content/trancendence.gif)
-<br/>
-<br/>
-### .accent[__next >>__] recap
-
-]
-]
-
-]
-
-???
-
-> * 
-
----
-
-# recap
-
-???
-
-> * 
-
----
-
-# recap
-
-.accent[
-## values distributed in time]
-
-.center[
-.image-60[
-![](content/water_balloons.gif)
-]
-]
-
-???
-
-> * 
-
----
-
-# recap
-
-.accent[
-## write an algorithm]
-
-.center[
-.image-60[
-![](content/honda rube.gif)
-]
-]
-
-???
-
-> * 
-
----
-
-# recap
-
-.accent[
-## virtuous procrastination]
-
-.center[
-.image-60[
-![](content/lemur on photographer.gif)
-]
-]
-
-???
-
-> * 
-
----
-
-# recap
-
-.accent[
-## opt-in thread-safety]
-
-.center[
-.image-60[
-![](content/snl conductor.gif)
-]
-]
-
-???
-
-> * 
-
----
-background-image: url(content/drop%20cam.gif)
-
-# recap
-
-.accent[
-## adapt existing sources]
-
-???
-
-> * 
-
----
-
-# recap
-
-.accent[
-## algorithmic trancendence]
-
-.center[
-.image-30[
-![](content/trancendence.gif)
-]
-]
-
-???
-
-> * 
-
----
-
-# things I desire
-
-- .accent[
-REST service library]
-- .accent[
-http service library]
-- .accent[
-bindings for ux libraries, like [https://github.com/tetsurom/rxqt](https://github.com/tetsurom/rxqt)]
-- .accent[
-bindings for asio, like [https://github.com/pudae/example](https://github.com/pudae/example)]
-- .accent[
-rxcpp v3 [https://github.com/kirkshoop/rxcppv3](https://github.com/kirkshoop/rxcppv3)]
-- .accent[
-standardization]
-- .accent[
-native algorithm support in libraries (asio, boost, poco, etc..)]
-
-???
-
-> * 
-
----
-
-.split-40[
-.column[
-
-## credits
-
-.accent[__Eric Mittelette__] shaped this presentation from start to finish. I am deeply grateful for all his time and effort.
-
-.accent[__Niall Connaughton__] presented the `RxJS` twitter analisys app that inspired me to build one with `rxcpp`
-
-.accent[__Aaron Lahman__] made the first prototype of rxcpp.
-
-.accent[__Grigoriy Chudnov__, __Valery Kopylov__] and many other rxcpp contributors..
-
-]
-
-
-.column[
-
-## resources
-
-- .accent[
-[https://github.com/kirkshoop/twitter](https://github.com/kirkshoop/twitter)]
-- .accent[
-[https://github.com/Reactive-Extensions/RxCpp](https://github.com/Reactive-Extensions/RxCpp)]
-- .accent[
-[http://reactive-extensions.github.io/RxCpp/](http://reactive-extensions.github.io/RxCpp/)]
-- .accent[
-[https://github.com/kirkshoop/rxcppv3](https://github.com/kirkshoop/rxcppv3)]
-- .accent[
-[http://rxmarbles.com/](http://rxmarbles.com/)]
-- .accent[
-[http://reactivex.io/intro.html](http://reactivex.io/intro.html)]
-- .accent[
-[http://reactivex.io/learnrx/](http://reactivex.io/learnrx/)]
-
-]
-]
-
-???
-
-> * 
-
----
-
-##complete.
-questions?
-
-<rx-marbles key="concat"/>
-
-???
-
-> * 
-
----
-
-# appendix
-
-???
-
-> * 
-
----
-
-# rxcpp architecture
-
-.mermaid[
-classDiagram
-    subscription --o subscriber : 1
-    observer --o subscriber : 1
-    subscription : bool is_subscribed()
-    subscription : void unsubscribe()
-    observer : void on_next(T)
-    observer : void on_error(exception_ptr)
-    observer : void on_completed()
-    subscriber : subscription get_subscription()
-    subscriber : observer get_observer()
-    subscriber : void on_next(T)
-    subscriber : void on_error(exception_ptr)
-    subscriber : void on_completed()
-    subscriber : bool is_subscribed()
-    subscriber : void unsubscribe()
-    observable o-- subscriber : 0..n
-    observable : subscription subscribe(subscriber)
-]
-
-???
-
-> *
-
----
-
-# rxcpp scheduler architecture
-
-.mermaid[
-classDiagram
-    action --o schedulable : 1
-    subscription --o worker : 1
-    subscription --o schedulable : 1
-    subscription : bool is_subscribed()
-    subscription : void unsubscribe()
-    action : void operator()()
-    schedulable : subscription get_subscription()
-    schedulable : action get_schedulable()
-    scheduler -- worker
-    worker o-- schedulable : 0..n
-    scheduler : time_point now()
-    scheduler : worker create_worker(subscription)
-    worker : scheduler get_scheduler()
-    worker : time_point now()
-    worker : subscription schedule(time_point at, schedulable)
-]
-
-???
-
-> *
-
----
-
-# how to call sentiment web service
-
---
-
-```
-auto requestsentiment = defer([=]() {
-```
-
---
-
-```
-    std::map<string, string> headers;
-    headers["Content-Type"] = "application/json";
-    headers["Authorization"] = "Bearer " + key;
-```
-
---
-
-```
-    auto body = json::parse(
-        R"({"Inputs":{"input1":[{"tweet_text": "Hi!"}]},"GlobalParameters":{}})"
-    );
-```
-
---
-
-```
-    return http.create(http_request{url, "POST", headers, body.dump()}) |
-        map([](http_response r){
-            return r.body.complete;
-        }) |
-        `merge(poolthread)`;
-});
-```
 
 ???
 
@@ -2553,6 +1575,261 @@ virtual void schedule(clock_type::time_point when,
 
 ---
 
+background-image: url(content/drop%20cam.gif)
+
+# adapt async sources
+
+???
+
+> * 
+
+---
+
+# adapt async sources - http requests using libcurl
+
+--
+
+- .accent[
+### `curl_multi_perform` supports multiplexing requests on a thread]
+
+--
+
+- .accent[
+### all the calls to curl must be made from that thread]
+
+--
+
+- .accent[
+### completion and results must be delivered to the matching request]
+
+???
+
+> * 
+
+---
+
+# adapt async sources - http requests using libcurl
+
+```
+auto worker = create<CURLMsg*>([](subscriber<CURLMsg*> out){
+    while(out.is_subscribed()) {
+      `curl_multi_perform`(curlm, /*. . .*/);
+      for(;;) {
+        CURLMsg *message = nullptr;
+        message = `curl_multi_info_read`(curlm, /*. . .*/);
+        out.on_next(message);
+        if (!!message /*. . .*/) { continue; }
+        break;
+      }
+      int handlecount = 0;
+      `curl_multi_wait`(curlm, nullptr, 0, 500, &handlecount);
+    }
+    out.on_completed();
+  }) |
+  subscribe_on(`httpthread`) |
+  publish() | connect_forever(); // share
+```
+
+???
+
+> * 
+
+---
+
+# adapt async sources - http requests using libcurl
+
+```
+auto worker = create<CURLMsg*>([](subscriber<CURLMsg*> out){
+    while(out.`is_subscribed`()) {
+      curl_multi_perform(curlm, /*. . .*/);
+      for(;;) {
+        CURLMsg *message = nullptr;
+        message = curl_multi_info_read(curlm, /*. . .*/);
+        out.`on_next`(message);
+        if (!!message /*. . .*/) { continue; }
+        break;
+      }
+      int handlecount = 0;
+      curl_multi_wait(curlm, nullptr, 0, 500, &handlecount);
+    }
+    out.`on_completed`();
+  }) |
+  subscribe_on(httpthread) |
+  publish() | connect_forever(); // share
+```
+
+???
+
+> * 
+
+---
+
+# adapt async sources - http requests using libcurl
+
+to create an http request, use `worker` observable to run the curl api calls on the httpthread.
+
+.split-50[
+.column[
+
+.accent[
+subscribe to http request]
+
+```
+worker
+  | take(1)
+  | tap([] (CURLMsg*){
+    auto curl = curl_easy_init();
+    curl_easy_setopt(curl, 
+      CURLOPT_URL, url.c_str());
+    // . . . 
+    curl_multi_add_handle(curlm, curl);
+    //
+  })
+  | subscribe();
+```
+]
+
+.column[
+
+.accent[
+unsubscribe http request (cancel)]
+
+```
+worker
+  | take(1)
+  | tap([] (CURLMsg*){
+    //
+    //
+    //
+    //
+    curl_multi_remove_handle(curlm, curl);
+    curl_easy_cleanup(curl);
+  })
+  | subscribe();
+```
+
+]
+]
+
+???
+
+> * 
+
+---
+
+.split-60[
+.column[
+
+![](content/adapt async sources-COMPLETED-green.svg)
+
+- .accent[
+## adapted libcurl to rxcpp]
+
+- .accent[
+## built __polling loop__ to adapt libcurl to rxcpp]
+
+- .accent[
+## __callback__, __future__, __completion port__, etc.. patterns can also be adapted to rxcpp]
+
+]
+
+.column[
+.right[
+.image-50[
+![](content/drop cam.gif)
+]
+
+<br/>
+<br/>
+### .accent[__next >>__] recap
+
+]
+]
+
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
+## values distributed in time]
+
+.center[
+.image-60[
+![](content/water_balloons.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
+## write an algorithm]
+
+.center[
+.image-60[
+![](content/honda rube.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
+## virtuous procrastination]
+
+.center[
+.image-60[
+![](content/lemur on photographer.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
+## opt-in thread-safety]
+
+.center[
+.image-60[
+![](content/snl conductor.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
 # recap
 
 .accent[
@@ -2567,6 +1844,203 @@ virtual void schedule(clock_type::time_point when,
 ???
 
 > * 
+
+---
+background-image: url(content/drop%20cam.gif)
+
+# recap
+
+.accent[
+## adapt existing sources]
+
+???
+
+> * 
+
+---
+
+# things I desire
+
+- .accent[
+REST service library]
+- .accent[
+http service library]
+- .accent[
+bindings for ux libraries, like [https://github.com/tetsurom/rxqt](https://github.com/tetsurom/rxqt)]
+- .accent[
+bindings for asio, like [https://github.com/pudae/example](https://github.com/pudae/example)]
+- .accent[
+rxcpp v3 [https://github.com/kirkshoop/rxcppv3](https://github.com/kirkshoop/rxcppv3)]
+- .accent[
+standardization]
+- .accent[
+native algorithm support in libraries (asio, boost, poco, etc..)]
+
+???
+
+> * 
+
+---
+
+.split-40[
+.column[
+
+## credits
+
+.accent[__Gor Nishanov__] introduced me to .accent[__Axel Naumann__] who arranged my visit.
+
+.accent[__Eric Mittelette__] shaped this presentation from start to finish. I am deeply grateful for all his time and effort.
+
+.accent[__Niall Connaughton__] presented the `RxJS` twitter analisys app that inspired me to build one in `rxcpp`
+
+.accent[__Aaron Lahman__] made the first prototype of rxcpp.
+
+.accent[__Grigoriy Chudnov__, __Valery Kopylov__] and many other rxcpp contributors..
+
+]
+
+
+.column[
+
+## resources
+
+- .accent[
+[https://github.com/kirkshoop/twitter](https://github.com/kirkshoop/twitter)]
+- .accent[
+[https://github.com/Reactive-Extensions/RxCpp](https://github.com/Reactive-Extensions/RxCpp)]
+- .accent[
+[http://reactive-extensions.github.io/RxCpp/](http://reactive-extensions.github.io/RxCpp/)]
+- .accent[
+[https://github.com/kirkshoop/rxcppv3](https://github.com/kirkshoop/rxcppv3)]
+- .accent[
+[http://rxmarbles.com/](http://rxmarbles.com/)]
+- .accent[
+[http://reactivex.io/intro.html](http://reactivex.io/intro.html)]
+- .accent[
+[http://reactivex.io/learnrx/](http://reactivex.io/learnrx/)]
+
+]
+]
+
+???
+
+> * 
+
+---
+
+##complete.
+questions?
+
+<rx-marbles key="concat"/>
+
+???
+
+> * 
+
+---
+
+# appendix
+
+???
+
+> * 
+
+---
+
+# rxcpp architechture
+
+.mermaid[
+classDiagram
+    subscription --o subscriber : 1
+    observer --o subscriber : 1
+    subscription : bool is_subscribed()
+    subscription : void unsubscribe()
+    observer : void on_next(T)
+    observer : void on_error(exception_ptr)
+    observer : void on_completed()
+    subscriber : subscription get_subscription()
+    subscriber : observer get_observer()
+    subscriber : void on_next(T)
+    subscriber : void on_error(exception_ptr)
+    subscriber : void on_completed()
+    subscriber : bool is_subscribed()
+    subscriber : void unsubscribe()
+    observable o-- subscriber : 0..n
+    observable : subscription subscribe(subscriber)
+]
+
+???
+
+> *
+
+---
+
+# rxcpp scheduler architechture
+
+.mermaid[
+classDiagram
+    action --o schedulable : 1
+    subscription --o worker : 1
+    subscription --o schedulable : 1
+    subscription : bool is_subscribed()
+    subscription : void unsubscribe()
+    action : void operator()()
+    schedulable : subscription get_subscription()
+    schedulable : action get_schedulable()
+    scheduler -- worker
+    worker o-- schedulable : 0..n
+    scheduler : time_point now()
+    scheduler : worker create_worker(subscription)
+    worker : scheduler get_scheduler()
+    worker : time_point now()
+    worker : subscription schedule(time_point at, schedulable)
+]
+
+???
+
+> *
+
+---
+
+# how to call sentiment web service
+
+--
+
+```
+auto requestsentiment = defer([=]() {
+```
+
+--
+
+```
+    std::map<string, string> headers;
+    headers["Content-Type"] = "application/json";
+    headers["Authorization"] = "Bearer " + key;
+```
+
+--
+
+```
+    auto body = json::parse(
+        R"({"Inputs":{"input1":[{"tweet_text": "Hi!"}]},"GlobalParameters":{}})"
+    );
+```
+
+--
+
+```
+    return http.create(http_request{url, "POST", headers, body.dump()}) |
+        map([](http_response r){
+            return r.body.complete;
+        }) |
+        `merge(poolthread)`;
+});
+```
+
+???
+
+> * 
+
 
     </textarea>
     <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
