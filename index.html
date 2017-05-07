@@ -151,8 +151,83 @@ class: middle
 
 ---
 
+#### DEMO
+
 .center[
 .image-80[
+![twitter application](content/twitter_with_word_sentiment.gif)
+]
+]
+
+???
+
+> * For 10 years I searched for the right abstraction to write responsive apps without sync primitives
+> * I once built a rudimentary Sender/Receiver pattern to stream xml+zip documents in Windows
+> * A co-worker on that project later pointed me to Rx
+> * In Rx I saw the pattern completed and used to build algorithms
+> * It was like the first time I saw the STL or the first time I read _Modern C++ Design_
+> * I built Rx in c++ because I wanted to build responsive apps using Rx
+> * twitter stream api
+> * sample of live tweets.
+> * sentiment analysis 
+> * words (wanna, love)
+
+---
+
+# topics
+
+- .accent[__primitives are too primitive__
+]
+- .accent[__handling Tweets__
+]
+- .accent[__values distributed in time__
+]
+- .accent[__write an algorithm__
+]
+- .accent[__virtuous procrastination__
+]
+- .accent[__opt-in thread-safety__
+]
+- .accent[__adapt existing sources__
+]
+- .accent[__algorithmic trancendence__
+]
+
+???
+
+> * 
+
+---
+
+# primitives are too primitive
+
+.center[
+.image-70[
+![primitive technology](content/primitivetechnology.gif)
+]
+
+[https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA](https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA)
+
+]
+
+
+???
+
+> * these videos are mesmerizing to watch and I yearn to build some of these things
+> * however, the time and cuts and blisters and pain mean that this is not the right way to build a house commercially.
+> * I expect that we all yearn to write an OS or a language or a lock-free queue
+> * However, I wrote Rx using async primitives because I do not want to write code using async primitives
+> * there is a reason to write C++ and use a linker to produce the machine code
+> * there is a reason to use STL and algorithms and libraries written by others
+> * assembly & intrinsics are the wrong abstractions.
+> * atomics, thread, async, mutex, condition_variable, promise, future
+
+---
+
+# primitives are too primitive
+
+.center[
+.image-60[
 ![Sean Parent](content/seanparent.png)
 ]
 
@@ -167,152 +242,215 @@ class: middle
 
 > * In 2013, I attended Sean Parent's C++ Seasoning talk at Going Native where he advocated for having no raw for loops 
 in code. 
-
----
-
-.split-50[
-
-.column[
-.center[
-
-## .accent[Raw Loop]
-
-![raw loop](content/rawloop.png)
-]
-]
-
-.column[
-.center[
-
-## .accent[Algorithms]
-
-![algorithms](content/norawloop.png)
-]
-]
-
-]
-
-???
-
 > * One of the things Sean said was that when reviewing code he would try to find the algorithms 
 that each for loop was reimplementing - often poorly - and ask for the loop to be replaced by the algorithms.
-
----
-
-.center[
-.image-70[
-![no raw async primitives](content/norawasyncprimitives.png)
-]
-]
-
-???
-
 > * Later in the talk Sean added another goal - no raw syncronization primitives.
 
 ---
 
-.center[
-.image-70[
-![primitive technology](content/primitivetechnology.gif)
+.split-60[
+.column[
+
+![](content/primitives are too primitive-COMPLETED-green.svg)
+
+- .accent[
+## avoid reimplementing algorithms]
+
+- .accent[
+## avoid using synchronization primitives]
+
 ]
 
-.accent[primitives are mezmerizing and painful
+.column[
+.right[
+![](content/primitivetechnology.gif)
+<br/>
+<br/>
+### .accent[__next >>__] handling Tweets
+
+]
 ]
 
-[https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA](https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA)
-
-]
-
-
-???
-
-> * these videos are mesmerizing to watch and I yearn to build some of these things
-> * I expect that we all yearn to write an OS or a language or a lock-free queue
-> * however, the time and cuts and blisters and pain mean that this is not the right way to build a house commercially.
-> * there is a reason to write C++ and use a linker to produce the machine code
-> * there is a reason to use STL and algorithms and libraries written by others
-> * assembly & intrinsics are the wrong abstractions.
-> * atomics, thread, async, mutex, condition_variable, promise, future
-
----
-
-#### DEMO
-
-.center[
-.image-80[
-![twitter application](content/twitter_with_word_sentiment.gif)
-]
 ]
 
 ???
-
-> * For 10 years I searched for the right abstraction to write responsive apps without sync primitives
-> * I built a rudimentary Sender/Receiver pattern to stream xml+zip documents in Windows
-> * A co-worker on that project later pointed me to Rx
-> * I saw the pattern completed and used to build algorithms
-> * It was like the first time I saw the STL or the first time I read _Modern C++ Design_
-> * I built Rx in c++ because I wanted to build apps using Rx
-> * twitter stream api
-> * sample of live tweets.
-> * sentiment analysis 
-> * words (wanna, love)
-
----
-
-# raw promises and callbacks
-
-???
-
-promise - shleping one value at a time vs piplineing
-callbacks - hard to compose, tends to reimplement algorithms
 
 > * 
 
 ---
 
-# raw promises
+# handling Tweets
 
-```cpp
-each(objProc.begin(), objProc.end(), 
-    [&](It<string> c, It<string> e) {
-        //
-        // split chunks and group into tweets
-        string chunk = partial + *c;
-        partial.clear();
-        auto chunks = split(chunk, "\r\n");
-        string line;
-        for (auto& chunk : chunks){
-            if (!isEndOfTweet(chunk)) {
-                line = chunk;
-                partial = chunk;
-                continue;
-            }
-            partial.clear();
-            parseline(line);
-        }
-    });
-```
+.accent[__callback per Tweet__
+]
+
+.center[
+.image-50[
+![converters](content/converters.jpg)
+]
+
+]
 
 ???
 
-> * each will map to for-await
-> * for-await will over-serialize
-> * new promise created for each value
+> * awkward to chain together
+> * no consistent handling of errors. cancellation. completion.
+> * easy to lose signals in each connection
 
 ---
 
-# raw callbacks
+# handling Tweets
 
-```cpp
-void parseline(const string& line) {
+.accent[__promise per Tweet__
+]
+
+.center[
+.image-60[
+![egg relay](content/Egg_Relay_Race_2015.gif)
+]
+
+.accent[
+]
+
+[https://www.youtube.com/watch?v=JyVSmP-MKgY](https://www.youtube.com/watch?v=JyVSmP-MKgY)
+]
+
+???
+
+> * awkward syncronization to transfer each value from each future to the next promise.
+
+---
+
+# handling Tweets
+
+.accent[__promise per Tweet__
+]
+
+.split-50[
+
+.column[
+.image-80[
+![egg relay](content/Egg_Relay_Race_2015.gif)
+]
+
+.accent[
+]
+
+[https://www.youtube.com/watch?v=JyVSmP-MKgY](https://www.youtube.com/watch?v=JyVSmP-MKgY)
+
+]
+
+.column[
+
+```
+for (int i = 0; i < 10000000; i++) {
+    std::promise<unit> ready;
+    ready.set_value(unit());
+    auto isready = ready.get_future();
+    if (isready.wait_for(0ms) == timeout) {
+        isready.wait();
+    }
+}
+```
+
+.accent[**output**
+]
+
+  - .accent[10,000,000 on_next calls
+]
+  - .accent[3018ms elapsed 
+]
+  - .accent[3,313,450 ops/sec
+]
+
+]
+
+]
+
+???
+
+---
+
+# handling Tweets
+
+.accent[__subscription to all Tweets__
+]
+
+.center[
+.image-70[
+![robin hood](content/robinhood.gif)
+]
+
+.accent[
+]
+
+]
+
+---
+
+# handling Tweets
+
+.accent[__subscription to all Tweets__
+]
+
+.split-50[
+
+.column[
+.image-80[
+![robin hood](content/robinhood.gif)
+]
+
+.accent[
+]
+
+]
+
+.column[
+
+```
+auto o = rx::make_subscriber<int>(
+    [&c](int){++c;},
+    [](std::exception_ptr){abort();});
+
+for (int i = 0; i < 10000000; i++) {
+    o.on_next(i);
+}
+o.on_completed();
+```
+
+.accent[**output**
+]
+
+
+  - .accent[10,000,000 on_next calls
+]
+  - .accent[17ms elapsed 
+]
+  - .accent[588,235,000 ops/sec
+]
+
+]
+
+]
+
+???
+
+---
+
+# handling Tweets
+
+.accent[raw callbacks
+]
+
+```
+void parseline(const string& line, auto& handlers) {
     try {
         auto text = tweettext(json::parse(line));
         auto words = splitwords(text);
 
-        //
         // publish tweets - multicast
         for(auto& f : handlers) {
-            f(text, words);
+            `f(text, words)`;
         }
     } catch (const exception& ex){
         cerr << ex.what() << endl;
@@ -328,78 +466,124 @@ void parseline(const string& line) {
 
 ---
 
+# handling Tweets
+
+.accent[raw promises
+]
+
 .split-50[
-
 .column[
 
-# promise per value
-
-```cpp
-for (int i = 0; i < 10000000; i++) {
-    std::promise<unit> ready;
-    ready.set_value(unit());
-    auto isready = ready.get_future();
-    if (isready.wait_for(0ms) == timeout) {
-        isready.wait();
+w/o coroutines
+```
+ `each`(objProc.begin(), objProc.end(), 
+  [&](It<string> c, It<string> e) {
+    // split chunks and group into tweets
+    string chunk = partial + *c;
+    partial.clear();
+    string line;
+    for (auto& chunk : split(chunk, "\r\n")){
+      if (!isEndOfTweet(chunk)) {
+        partial = line = chunk;
+         continue;
+      }
+      partial.clear();
+      parseline(line);
     }
-}
+  });
 ```
-
-.accent[**output**
-]
-
-```sh
-loop future<unit>   : 
-    10,000,000 on_next calls, 
-    3018ms elapsed 
-    3,313,450 ops/sec
-```
-
 ]
 
 .column[
 
-# subscription
+coroutines
+```
+ `for await` (auto& c : objProc) {
 
-```cpp
-auto o = rx::make_subscriber<int>(
-    [&c](int){++c;},
-    [](std::exception_ptr){abort();});
-
-for (int i = 0; i < 10000000; i++) {
-    o.on_next(i);
+  // split chunks and group into tweets
+  string chunk = partial + *c;
+  partial.clear();
+  string line;
+  for (auto& chunk : split(chunk, "\r\n")){
+    if (!isEndOfTweet(chunk)) {
+      partial = line = chunk;
+       continue;
+    }
+    partial.clear();
+    parseline(line);
+  }
 }
-o.on_completed();
-```
-
-.accent[**output**
-]
-
-```sh
-loop -> subscriber  : 
-    10,000,000 on_next calls,   
-    17ms elapsed 
-    588,235,000 ops/sec
 ```
 
 ]
 
 ]
+
 ???
 
-> * async lifetimes are expensive
-> * avoid using async lifetime per value 
+> * each will map to for-await
+> * for-await will over-serialize
+> * new promise created for each value
 
 ---
 
-# topics
+# handling Tweets
 
-- .accent[### values distributed in time]
-- .accent[### write an algorithm]
-- .accent[### virtuous procrastination]
-- .accent[### opt-in thread-safety]
-- .accent[### adapt existing sources]
-- .accent[### algorithmic trancendence]
+.accent[subscription
+]
+
+```
+auto tweets = defer([=](){
+    auto url = oauth2SignUrl("https://stream.twitter...");
+    return http.create(http_request{url, method, {}, {}}) |
+      map([](http_response r){
+        return r.body.chunks;
+      }) |
+      merge(tweetthread);
+  }) |
+  twitter_stream_reconnection(tweetthread) |
+  parsetweets(poolthread, tweetthread) |
+  publish() | ref_count();
+```
+
+???
+
+> * good cmoposition
+> * good efficiency
+> * more descriptive code
+
+---
+
+.split-60[
+.column[
+
+![](content/handling Tweets-COMPLETED-green.svg)
+
+- .accent[
+## mentioned callback composition]
+
+- .accent[
+## showed promise overhead]
+
+- .accent[
+## showed subscription efficiency]
+
+- .accent[
+## showed examples of each]
+
+]
+
+.column[
+.right[
+![](content/robinhood.gif)
+<br/>
+<br/>
+### .accent[__next >>__] values distributed in time
+
+]
+]
+
+]
 
 ???
 
@@ -409,25 +593,11 @@ loop -> subscriber  :
 
 # values distributed in time
 
-- .accent[
-## time vs. space]
-
-- .accent[
-## flow of a subscription]
-
-- .accent[
-## when to apply]
-
-???
-
-> * 
-
----
-
-# my son says: "space vs time is explained by playing cards"
+.accent[
+### my son says: "space vs time is explained by playing cards"]
 
 .center[
-.image-70[
+.image-60[
 ![poker game](content/poker-gremlin.gif)
 ]
 ]
@@ -438,11 +608,14 @@ loop -> subscriber  :
 
 ---
 
-# each player has 0 or more cards
+# values distributed in time
+
+.accent[
+### each player has 0 or more cards]
 
 .center[
 
-.image-50[
+.image-40[
 ![poker hand](content/poker-game-264599_1280.jpg)
 ]
 
@@ -459,11 +632,14 @@ array and list are __values distributed in space__
 
 ---
 
-# the dealer distributes cards in time
+# values distributed in time
+
+.accent[
+### the dealer distributes cards in time]
 
 .center[
 
-.image-60[
+.image-50[
 ![poker deck](content/poker-deck-875295_1280.jpg)
 ]
 
@@ -2069,6 +2245,40 @@ var subscription = telemetryUpdate$.subscribe();
 # recap
 
 .accent[
+## primitives are too primitive]
+
+.center[
+.image-60[
+![](content/primitivetechnology.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
+## handling Tweets]
+
+.center[
+.image-60[
+![](content/robinhood.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# recap
+
+.accent[
 ## values distributed in time]
 
 .center[
@@ -2567,6 +2777,47 @@ virtual void schedule(clock_type::time_point when,
 ???
 
 > * 
+
+---
+
+.split-50[
+
+.column[
+.center[
+
+## .accent[Raw Loop]
+
+![raw loop](content/rawloop.png)
+]
+]
+
+.column[
+.center[
+
+## .accent[Algorithms]
+
+![algorithms](content/norawloop.png)
+]
+]
+
+]
+
+???
+
+> * One of the things Sean said was that when reviewing code he would try to find the algorithms 
+that each for loop was reimplementing - often poorly - and ask for the loop to be replaced by the algorithms.
+
+---
+
+.center[
+.image-70[
+![no raw async primitives](content/norawasyncprimitives.png)
+]
+]
+
+???
+
+> * Later in the talk Sean added another goal - no raw syncronization primitives.
 
     </textarea>
     <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
