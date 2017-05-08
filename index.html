@@ -639,16 +639,12 @@ auto tweets = defer([=](){
 ![poker hand](content/poker-game-264599_1280.jpg)
 ]
 
-cards in the hand can be processed now
-.accent[
-array and list are __values distributed in space__
-]
-
 ]
 
 ???
 
-> * 
+> * cards in the hand can be processed now
+> * array and list are __values distributed in space__
 
 ---
 
@@ -663,16 +659,12 @@ array and list are __values distributed in space__
 ![poker deck](content/poker-deck-875295_1280.jpg)
 ]
 
-cards in the deck cannot be processed now
-.accent[
-user input and IO are __values distributed in time__
-]
-
 ]
 
 ???
 
-> * 
+> * cards in the deck cannot be processed now
+> * user input and IO are __values distributed in time__
 
 ---
 
@@ -1966,6 +1958,98 @@ worker
 
 ---
 
+## sample of the algorithms available
+
+[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
+
+.split-60[
+
+.column[
+
+*   .accent[__buffer__] - [reactivex.io](http://reactivex.io/documentation/operators/buffer.html)
+*   combine_latest - [rxmarbles.com](http://rxmarbles.com/#combineLastest)
+*   concat - [rxmarbles.com](http://rxmarbles.com/#concat)
+*   concat_map
+*   .accent[__debounce__] - [rxmarbles.com](http://rxmarbles.com/#debounce)
+*   .accent[__delay__] - [rxmarbles.com](http://rxmarbles.com/#delay)
+*   distinct - [rxmarbles.com](http://rxmarbles.com/#distinct)
+*   .accent[__distinct_until_changed__] - [rxmarbles.com](http://rxmarbles.com/#distinctUntilChanged)
+*   element_at - [rxmarbles.com](http://rxmarbles.com/#elementAt)
+*   .accent[__filter__] - [rxmarbles.com](http://rxmarbles.com/#filter)
+*   .accent[__finally__]
+*   flat_map - [reactivex.io](http://reactivex.io/documentation/operators/flatmap.html)
+]
+
+.column[
+
+*   .accent[__group_by__] - [reactivex.io](http://reactivex.io/documentation/operators/groupby.html)
+*   .accent[__ignore_elements__] - [reactivex.io](http://reactivex.io/documentation/operators/ignoreelements.html)
+*   .accent[__map__] - [rxmarbles.com](http://rxmarbles.com/#map)
+*   .accent[__merge__] - [rxmarbles.com](http://rxmarbles.com/#merge)
+*   observe_on - [reactivex.io](http://reactivex.io/documentation/operators/observeon.html)
+*   .accent[__on_error_resume_next__] - [reactivex.io](http://reactivex.io/documentation/operators/catch.html)
+*   pairwise
+*   .accent[__publish__] - [reactivex.io](http://reactivex.io/documentation/operators/publish.html)
+*   reduce - [rxmarbles.com](http://rxmarbles.com/#reduce)
+*   .accent[__repeat__]
+*   replay - [reactivex.io](http://reactivex.io/documentation/operators/replay.html)
+*   .accent[__retry__] - [reactivex.io](http://reactivex.io/documentation/operators/retry.html)
+]
+
+]
+
+```
+
+```
+> .accent[__algorithms__] __used in the twitter app__
+
+---
+
+## sample of the algorithms available
+
+[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
+
+.split-60[
+
+.column[
+
+*   .accent[__sample__] - [rxmarbles.com](http://rxmarbles.com/#sample)
+*   .accent[__scan__] - [rxmarbles.com](http://rxmarbles.com/#scan)
+*   sequence_equal - [reactivex.io](http://reactivex.io/documentation/operators/sequenceequal.html)
+*   skip - [rxmarbles.com](http://rxmarbles.com/#skip)
+*   skip_last - [rxmarbles.com](http://rxmarbles.com/#skipLast)
+*   skip_until - [rxmarbles.com](http://rxmarbles.com/#skipUntil)
+*   .accent[__start_with__] - [rxmarbles.com](http://rxmarbles.com/#startWith)
+*   .accent[__subscribe_on__] - [reactivex.io](http://reactivex.io/documentation/operators/subscribeon.html)
+*   switch_if_empty - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
+*   .accent[__switch_on_next__] - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
+
+]
+
+.column[
+
+*   take - [rxmarbles.com](http://rxmarbles.com/#take)
+*   take_last - [rxmarbles.com](http://rxmarbles.com/#takeLast)
+*   .accent[__take_until__] - [rxmarbles.com](http://rxmarbles.com/#takeUntil)
+*   take_while - [reactivex.io](http://reactivex.io/documentation/operators/takewhile.html)
+*   time_interval - [reactivex.io](http://reactivex.io/documentation/operators/timeinterval.html)
+*   .accent[__timeout__] - [reactivex.io](http://reactivex.io/documentation/operators/timeout.html)
+*   timestamp - [reactivex.io](http://reactivex.io/documentation/operators/timestamp.html)
+*   .accent[__window__] - [reactivex.io](http://reactivex.io/documentation/operators/window.html)
+*   .accent[__with_latest_from__] - [rxmarbles.com](http://rxmarbles.com/#withLatestFrom)
+*   zip - [rxmarbles.com](http://rxmarbles.com/#zip)
+]
+
+]
+
+```
+
+```
+<br/>
+> .accent[__algorithms__] __used in the twitter app__
+
+---
+
 ## learn algorithms once, use them in any Language
 
 .split-50[
@@ -2099,221 +2183,19 @@ auto lines = linewindows |
 
 ---
 
-## sending telemetry from client page
-
-```ts
-var telemetry = new Rx.Subject<TelemetryData>();
-```
-
---
-
-```ts
-export function writeEntry(data: ITelemetryData) {
-    telemetry.onNext(new TelemetryData(data));
-}
-```
-
-???
-
-> * 
-
----
-
-## sending telemetry from client page
-
-```ts
-var pending: { bodysize: number, entries: TelemetryData[]; } = {
-    bodysize: 0,
-    entries: []
-};
-```
-
---
-
-```ts
-var maxTimeTrigger = Rx.Observable.interval(60 * 1000);
-```
-
---
-
-```ts
-var maxCountTrigger = telemetry.filter(e => pending.entries.length >= 50).map(e => -1);
-```
-
---
-
-```ts
-var maxSizeTrigger = telemetry.filter(e => pending.bodysize >= 20000).map(e => -2);
-```
-
---
-
-```ts
-var boundaries = Rx.Observable.merge(maxTimeTrigger, maxCountTrigger, maxSizeTrigger).share();
-```
-
-???
-
-> * 
-
----
-```ts
-export var telemetryUpdate$ = telemetry.
-    window(boundaries.startWith(-1), () => boundaries).
-```
-
---
-
-```ts
-    flatMap(w => w.reduce((data, entry) => {
-        data.bodysize += JSON.stringify(entry).length;
-        data.entries.push(entry);
-        return data;
-    }, pending)).
-    filter(data => data.entries.length !== 0).
-```
-
---
-
-```ts
-    flatMap(data => Rx.Observable.
-        fromPromise(flushTelemetry(FlushRequest.Async)).
-```
-
---
-
-```ts
-    // exponential backoff on failure
-        retryWhen(errors => errors.
-            scan((c, e) => c + 1, 0).
-            flatMap(i => Rx.Observable.timer(Math.pow(5, i) * 1000))).
-```
-
---
-
-```ts
-    // give up
-        timeout(10 * 60 * 1000, Rx.Observable.empty())).
-```
-
---
-
-```ts
-    retry();
-
-var subscription = telemetryUpdate$.subscribe();
-```
-
----
-
-## sample of the algorithms available
-
-[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
-
-.split-60[
-
-.column[
-
-*   .accent[__buffer__] - [reactivex.io](http://reactivex.io/documentation/operators/buffer.html)
-*   combine_latest - [rxmarbles.com](http://rxmarbles.com/#combineLastest)
-*   concat - [rxmarbles.com](http://rxmarbles.com/#concat)
-*   concat_map
-*   .accent[__debounce__] - [rxmarbles.com](http://rxmarbles.com/#debounce)
-*   .accent[__delay__] - [rxmarbles.com](http://rxmarbles.com/#delay)
-*   distinct - [rxmarbles.com](http://rxmarbles.com/#distinct)
-*   .accent[__distinct_until_changed__] - [rxmarbles.com](http://rxmarbles.com/#distinctUntilChanged)
-*   element_at - [rxmarbles.com](http://rxmarbles.com/#elementAt)
-*   .accent[__filter__] - [rxmarbles.com](http://rxmarbles.com/#filter)
-*   .accent[__finally__]
-*   flat_map - [reactivex.io](http://reactivex.io/documentation/operators/flatmap.html)
-]
-
-.column[
-
-*   .accent[__group_by__] - [reactivex.io](http://reactivex.io/documentation/operators/groupby.html)
-*   .accent[__ignore_elements__] - [reactivex.io](http://reactivex.io/documentation/operators/ignoreelements.html)
-*   .accent[__map__] - [rxmarbles.com](http://rxmarbles.com/#map)
-*   .accent[__merge__] - [rxmarbles.com](http://rxmarbles.com/#merge)
-*   observe_on - [reactivex.io](http://reactivex.io/documentation/operators/observeon.html)
-*   .accent[__on_error_resume_next__] - [reactivex.io](http://reactivex.io/documentation/operators/catch.html)
-*   pairwise
-*   .accent[__publish__] - [reactivex.io](http://reactivex.io/documentation/operators/publish.html)
-*   reduce - [rxmarbles.com](http://rxmarbles.com/#reduce)
-*   .accent[__repeat__]
-*   replay - [reactivex.io](http://reactivex.io/documentation/operators/replay.html)
-*   .accent[__retry__] - [reactivex.io](http://reactivex.io/documentation/operators/retry.html)
-]
-
-]
-
-```
-
-```
-> .accent[__algorithms__] __used in the twitter app__
-
----
-
-## sample of the algorithms available
-
-[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
-
-.split-60[
-
-.column[
-
-*   .accent[__sample__] - [rxmarbles.com](http://rxmarbles.com/#sample)
-*   .accent[__scan__] - [rxmarbles.com](http://rxmarbles.com/#scan)
-*   sequence_equal - [reactivex.io](http://reactivex.io/documentation/operators/sequenceequal.html)
-*   skip - [rxmarbles.com](http://rxmarbles.com/#skip)
-*   skip_last - [rxmarbles.com](http://rxmarbles.com/#skipLast)
-*   skip_until - [rxmarbles.com](http://rxmarbles.com/#skipUntil)
-*   .accent[__start_with__] - [rxmarbles.com](http://rxmarbles.com/#startWith)
-*   .accent[__subscribe_on__] - [reactivex.io](http://reactivex.io/documentation/operators/subscribeon.html)
-*   switch_if_empty - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
-*   .accent[__switch_on_next__] - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
-
-]
-
-.column[
-
-*   take - [rxmarbles.com](http://rxmarbles.com/#take)
-*   take_last - [rxmarbles.com](http://rxmarbles.com/#takeLast)
-*   .accent[__take_until__] - [rxmarbles.com](http://rxmarbles.com/#takeUntil)
-*   take_while - [reactivex.io](http://reactivex.io/documentation/operators/takewhile.html)
-*   time_interval - [reactivex.io](http://reactivex.io/documentation/operators/timeinterval.html)
-*   .accent[__timeout__] - [reactivex.io](http://reactivex.io/documentation/operators/timeout.html)
-*   timestamp - [reactivex.io](http://reactivex.io/documentation/operators/timestamp.html)
-*   .accent[__window__] - [reactivex.io](http://reactivex.io/documentation/operators/window.html)
-*   .accent[__with_latest_from__] - [rxmarbles.com](http://rxmarbles.com/#withLatestFrom)
-*   zip - [rxmarbles.com](http://rxmarbles.com/#zip)
-]
-
-]
-
-```
-
-```
-<br/>
-> .accent[__algorithms__] __used in the twitter app__
-
----
-
 .split-60[
 .column[
 
 ![](content/algorithmic trancendence-COMPLETED-green.svg)
 
 - .accent[
+## sampled available algorithms]
+
+- .accent[
 ## showed __languages__ with ReactiveX implementations]
 
 - .accent[
 ## built __message parsing__ in C# and C++]
-
-- .accent[
-## built __request batching__ in Javascript and C++]
-
-- .accent[
-## sampled available algorithms]
 
 ]
 
@@ -2920,6 +2802,117 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 
 > * Later in the talk Sean added another goal - no raw syncronization primitives.
 
+---
+
+
+## sending telemetry from client page
+
+```ts
+var telemetry = new Rx.Subject<TelemetryData>();
+```
+
+--
+
+```ts
+export function writeEntry(data: ITelemetryData) {
+    telemetry.onNext(new TelemetryData(data));
+}
+```
+
+???
+
+> * 
+
+---
+
+## sending telemetry from client page
+
+```ts
+var pending: { bodysize: number, entries: TelemetryData[]; } = {
+    bodysize: 0,
+    entries: []
+};
+```
+
+--
+
+```ts
+var maxTimeTrigger = Rx.Observable.interval(60 * 1000);
+```
+
+--
+
+```ts
+var maxCountTrigger = telemetry.filter(e => pending.entries.length >= 50).map(e => -1);
+```
+
+--
+
+```ts
+var maxSizeTrigger = telemetry.filter(e => pending.bodysize >= 20000).map(e => -2);
+```
+
+--
+
+```ts
+var boundaries = Rx.Observable.merge(maxTimeTrigger, maxCountTrigger, maxSizeTrigger).share();
+```
+
+???
+
+> * 
+
+---
+```ts
+export var telemetryUpdate$ = telemetry.
+    window(boundaries.startWith(-1), () => boundaries).
+```
+
+--
+
+```ts
+    flatMap(w => w.reduce((data, entry) => {
+        data.bodysize += JSON.stringify(entry).length;
+        data.entries.push(entry);
+        return data;
+    }, pending)).
+    filter(data => data.entries.length !== 0).
+```
+
+--
+
+```ts
+    flatMap(data => Rx.Observable.
+        fromPromise(flushTelemetry(FlushRequest.Async)).
+```
+
+--
+
+```ts
+    // exponential backoff on failure
+        retryWhen(errors => errors.
+            scan((c, e) => c + 1, 0).
+            flatMap(i => Rx.Observable.timer(Math.pow(5, i) * 1000))).
+```
+
+--
+
+```ts
+    // give up
+        timeout(10 * 60 * 1000, Rx.Observable.empty())).
+```
+
+--
+
+```ts
+    retry();
+
+var subscription = telemetryUpdate$.subscribe();
+```
+
+???
+
+> *
     </textarea>
     <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
     </script-->
