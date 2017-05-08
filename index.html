@@ -25,7 +25,7 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            margin-right: 175px;
+            margin-right: 190px;
         }
 
         .border {
@@ -176,23 +176,40 @@ class: middle
 
 # topics
 
-- .accent[__primitives are too primitive__
-]
-- .accent[__handling Tweets__
-]
-- .accent[__values distributed in time__
-]
-- .accent[__write an algorithm__
-]
-- .accent[__virtuous procrastination__
-]
-- .accent[__opt-in thread-safety__
-]
-- .accent[__adapt existing sources__
-]
-- .accent[__algorithmic trancendence__
+.split-60[
+.column[
+
+.accent[
+#### pick the pattern]
+
+- .accent[
+### primitives are too primitive]
+- .accent[
+### handling Tweets]
+- .accent[
+### values distributed in time]
+- .accent[
+### write an algorithm]
+
 ]
 
+.column[
+
+.accent[
+#### use the pattern]
+
+- .accent[
+### virtuous procrastination]
+- .accent[
+### opt-in thread-safety]
+- .accent[
+### adapt existing sources]
+- .accent[
+### algorithmic trancendence]
+
+]
+
+]
 ???
 
 > * 
@@ -202,8 +219,11 @@ class: middle
 # primitives are too primitive
 
 .center[
-.image-70[
+.image-60[
 ![primitive technology](content/primitivetechnology.gif)
+]
+
+.accent[primitive technology
 ]
 
 [https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA](https://www.youtube.com/channel/UCAL3JXZSzSm8AlZyD3nQdBA)
@@ -860,29 +880,6 @@ deactivate observable
 
 ---
 
-# values distributed in time
-
-.accent[
-## subcriptions are useful to..]
-
-- .accent[
-### defer work]
-
-- .accent[
-### collect values and process periodically]
-
-- .accent[
-### provide intermediate results]
-
-- .accent[
-### combine values from multiple sources]
-
-???
-
-> *
-
----
-
 .split-70[
 .column[
 .image-80[
@@ -896,7 +893,16 @@ deactivate observable
 ## described flow of a subscription]
 
 - .accent[
-## described when to use a subscription]
+## subcriptions are useful to..]
+
+  - .accent[
+### defer work]
+
+  - .accent[
+### provide intermediate results]
+
+  - .accent[
+### combine values from multiple sources]
 
 ]
 
@@ -2200,6 +2206,98 @@ var subscription = telemetryUpdate$.subscribe();
 
 ---
 
+## sample of the algorithms available
+
+[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
+
+.split-60[
+
+.column[
+
+*   .accent[__buffer__] - [reactivex.io](http://reactivex.io/documentation/operators/buffer.html)
+*   combine_latest - [rxmarbles.com](http://rxmarbles.com/#combineLastest)
+*   concat - [rxmarbles.com](http://rxmarbles.com/#concat)
+*   concat_map
+*   .accent[__debounce__] - [rxmarbles.com](http://rxmarbles.com/#debounce)
+*   .accent[__delay__] - [rxmarbles.com](http://rxmarbles.com/#delay)
+*   distinct - [rxmarbles.com](http://rxmarbles.com/#distinct)
+*   .accent[__distinct_until_changed__] - [rxmarbles.com](http://rxmarbles.com/#distinctUntilChanged)
+*   element_at - [rxmarbles.com](http://rxmarbles.com/#elementAt)
+*   .accent[__filter__] - [rxmarbles.com](http://rxmarbles.com/#filter)
+*   .accent[__finally__]
+*   flat_map - [reactivex.io](http://reactivex.io/documentation/operators/flatmap.html)
+]
+
+.column[
+
+*   .accent[__group_by__] - [reactivex.io](http://reactivex.io/documentation/operators/groupby.html)
+*   .accent[__ignore_elements__] - [reactivex.io](http://reactivex.io/documentation/operators/ignoreelements.html)
+*   .accent[__map__] - [rxmarbles.com](http://rxmarbles.com/#map)
+*   .accent[__merge__] - [rxmarbles.com](http://rxmarbles.com/#merge)
+*   observe_on - [reactivex.io](http://reactivex.io/documentation/operators/observeon.html)
+*   .accent[__on_error_resume_next__] - [reactivex.io](http://reactivex.io/documentation/operators/catch.html)
+*   pairwise
+*   .accent[__publish__] - [reactivex.io](http://reactivex.io/documentation/operators/publish.html)
+*   reduce - [rxmarbles.com](http://rxmarbles.com/#reduce)
+*   .accent[__repeat__]
+*   replay - [reactivex.io](http://reactivex.io/documentation/operators/replay.html)
+*   .accent[__retry__] - [reactivex.io](http://reactivex.io/documentation/operators/retry.html)
+]
+
+]
+
+```
+
+```
+> .accent[__algorithms__] __used in the twitter app__
+
+---
+
+## sample of the algorithms available
+
+[http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html](http://reactive-extensions.github.io/RxCpp/namespacerxcpp_1_1operators.html)
+
+.split-60[
+
+.column[
+
+*   .accent[__sample__] - [rxmarbles.com](http://rxmarbles.com/#sample)
+*   .accent[__scan__] - [rxmarbles.com](http://rxmarbles.com/#scan)
+*   sequence_equal - [reactivex.io](http://reactivex.io/documentation/operators/sequenceequal.html)
+*   skip - [rxmarbles.com](http://rxmarbles.com/#skip)
+*   skip_last - [rxmarbles.com](http://rxmarbles.com/#skipLast)
+*   skip_until - [rxmarbles.com](http://rxmarbles.com/#skipUntil)
+*   .accent[__start_with__] - [rxmarbles.com](http://rxmarbles.com/#startWith)
+*   .accent[__subscribe_on__] - [reactivex.io](http://reactivex.io/documentation/operators/subscribeon.html)
+*   switch_if_empty - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
+*   .accent[__switch_on_next__] - [reactivex.io](http://reactivex.io/documentation/operators/switch.html)
+
+]
+
+.column[
+
+*   take - [rxmarbles.com](http://rxmarbles.com/#take)
+*   take_last - [rxmarbles.com](http://rxmarbles.com/#takeLast)
+*   .accent[__take_until__] - [rxmarbles.com](http://rxmarbles.com/#takeUntil)
+*   take_while - [reactivex.io](http://reactivex.io/documentation/operators/takewhile.html)
+*   time_interval - [reactivex.io](http://reactivex.io/documentation/operators/timeinterval.html)
+*   .accent[__timeout__] - [reactivex.io](http://reactivex.io/documentation/operators/timeout.html)
+*   timestamp - [reactivex.io](http://reactivex.io/documentation/operators/timestamp.html)
+*   .accent[__window__] - [reactivex.io](http://reactivex.io/documentation/operators/window.html)
+*   .accent[__with_latest_from__] - [rxmarbles.com](http://rxmarbles.com/#withLatestFrom)
+*   zip - [rxmarbles.com](http://rxmarbles.com/#zip)
+]
+
+]
+
+```
+
+```
+<br/>
+> .accent[__algorithms__] __used in the twitter app__
+
+---
+
 .split-60[
 .column[
 
@@ -2213,6 +2311,9 @@ var subscription = telemetryUpdate$.subscribe();
 
 - .accent[
 ## built __request batching__ in Javascript and C++]
+
+- .accent[
+## sampled available algorithms]
 
 ]
 
@@ -2571,7 +2672,7 @@ auto requestsentiment = defer([=]() {
 
 # delegate task execution - asio `io_service`
 
-[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp)
+[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service)
 
 --
 
@@ -2613,7 +2714,7 @@ public:
 
 # delegate task execution - asio `io_service`
 
-[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp)
+[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service)
 
 .split-60[
 .column[
@@ -2658,7 +2759,7 @@ public:
 
 # delegate task execution - asio `io_service`
 
-[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp)
+[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service)
 
 ```
 virtual void schedule(const schedulable& scbl) const {
@@ -2680,7 +2781,7 @@ virtual void schedule(const schedulable& scbl) const {
 
 # delegate task execution - asio `io_service`
 
-[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service.hpp)
+[https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service](https://github.com/pudae/example/blob/master/rx_test/rxasio/io_service)
 
 ```
 virtual void schedule(clock_type::time_point when,
