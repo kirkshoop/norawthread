@@ -1731,6 +1731,64 @@ __range-v3__ zips the tweet and sentiment vectors to match the tweet with the se
 
 ---
 
+# Azure Machine Learning
+
+.center[
+.image-60[
+![](content/dashboard.png)]
+]
+
+???
+
+> * 
+
+---
+
+# Azure Machine Learning
+
+.accent[
+__Request__]
+
+```http
+POST /subscriptions/<subscription-id>/services/<service-id>/execute HTTP/1.1
+Host: ussouthcentral.services.azureml.net
+Connection: keep-alive
+Content-Length: 148
+Authorization: Bearer <api-key>
+
+{"Inputs":{"input1":[{"tweet_text":"..."}]},"GlobalParameters":{}}
+```
+
+.accent[
+__Response__]
+
+```http
+HTTP/1.1 200 OK
+Content-Length: 77
+Content-Type: application/json; format=swagger; charset=utf-8
+
+{"Results":{"output1":[{"Sentiment":"positive","Score":"0.87877231836319"}]}}
+```
+
+???
+
+> * 
+
+---
+
+# Azure Machine Learning
+
+.center[
+.image-60[
+![](content/experiment.png)]
+]
+
+???
+
+> * 
+
+---
+
 .split-60[
 .column[
 ![](content/opt--in thread--safety-COMPLETED-green.svg)
