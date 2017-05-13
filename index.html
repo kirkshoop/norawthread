@@ -301,6 +301,8 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 
 # handling Tweets
 
+--
+
 .accent[__callback per Tweet__
 ]
 
@@ -363,6 +365,7 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 .column[
 
 ```
+auto onnext = [&c](int){++c;};
 for (int i = 0; i < 10000000; i++) {
     std::promise<unit> ready;
     ready.set_value(unit());
@@ -370,6 +373,7 @@ for (int i = 0; i < 10000000; i++) {
     if (isready.wait_for(0ms) == timeout) {
         isready.wait();
     }
+    onnext(0);
 }
 ```
 
@@ -504,11 +508,11 @@ w/o coroutines
     string line;
     for (auto& chunk : split(chunk, "\r\n")){
       if (!isEndOfTweet(chunk)) {
-        partial = line = chunk;
+         partial = line = chunk;
          continue;
       }
       partial.clear();
-      parseline(line);
+      parseline(line, handlers);
     }
   });
 ```
@@ -526,11 +530,11 @@ coroutines
   string line;
   for (auto& chunk : split(chunk, "\r\n")){
     if (!isEndOfTweet(chunk)) {
-      partial = line = chunk;
+       partial = line = chunk;
        continue;
     }
     partial.clear();
-    parseline(line);
+    parseline(line, handlers);
   }
 }
 ```

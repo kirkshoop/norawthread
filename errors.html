@@ -137,13 +137,18 @@ class: middle
 
 # errors
 
+.accent[
+### forgotten, but not gone]
+
 ]
 
 ???
 
-> * https://github.com/kirkshoop/GSL/commit/a8c46e58d318158aec5d9c53236428d0ae39703a 
+> *  
 
 ---
+
+# some apis that return errors 
 
 ```
 std::error_condition okApiCall(){
@@ -170,6 +175,7 @@ e = failApiCall();
 ???
 
 > * errors are ignored by default
+> * exceptions are not ingored by default
 
 ---
 
@@ -206,11 +212,43 @@ e = okApiCall();
 
 ???
 
-> * flaws in systems are different
+> * flaws in systems should result in a stop and a report
+> * this is intended to ensure that code bugs do not ship
+
+---
+class: middle
+
+.center[
+.accent[
+# what should happen if an error is forgotten?]]
+
+???
+
+> *
+
+---
+class: middle
+
+.center[
+.accent[
+# how would a forgotten error be detected?]]
+
+???
+
+> *
 
 ---
 
-# what should happen?
+# errors need to get a life .. time
+
+```
+// begin scope
+auto e = failApiCall();
+// end scope `boom`
+// begin scope
+e = failApiCall();
+// end scope `boom`
+```
 
 ???
 
@@ -227,7 +265,7 @@ unique_error_condition ge;
 ge.reset(okApiCall());
 // unssafe after calling api 
 
-// boom
+// `boom`
 ge.reset(okApiCall());
 ```
 
@@ -246,7 +284,7 @@ unique_error_condition ge;
 ge.reset(okApiCall());
 // unssafe after calling api 
 
-// boom
+// `boom`
 ```
 
 ???
@@ -268,7 +306,11 @@ if (!ge.ok()) {
     return ge.release();
 }
 // safe once it is checked
+```
 
+--
+
+```
 ge.reset(okApiCall());
 // unssafe after calling api 
 
@@ -280,6 +322,79 @@ return ge.release();
 
 > *
 
+---
+
+# example implementation for a Win32 winerror type
+
+```
+enum class winerror_error : DWORD {};
+
+inline winerror_error winerror_cast(DWORD raw) {
+	return static_cast<winerror_error>(raw);
+}
+
+template<>
+struct error_traits<winerror_error>
+{
+	using value_type = winerror_error;
+
+	static inline winerror_error initiate() {
+		return winerror_cast(ERROR_SUCCESS);
+	}
+
+	static inline bool ok(winerror_error winerror) {
+		return winerror == winerror_cast(ERROR_SUCCESS);
+	}
+};
+
+```
+
+---
+
+# example implementation for a Win32 winerror type
+
+```
+using unique_winerror = gsl::unique_error<winerror_error>;
+
+inline unique_winerror make_winerror_if(BOOL is_last_error) {
+	unique_winerror result;
+	if (is_last_error) {
+		return result.reset(GetLastError());
+	}
+	return result;
+}
+```
+
+---
+
+# example implementation for a Win32 winerror type
+
+```
+unique_winerror winerror;
+
+PCCERT_CONTEXT certcontext = CertCreateCertificateContext(
+    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+    &key.cert[0],
+    key.cert.size()
+);
+winerror = make_winerror_if(!certcontext);
+
+if (!winerror) {
+    std::wcout << L"could not get cert context" << std::endl; 
+}
+```
+
+[https://github.com/kirkshoop/authentication](https://github.com/kirkshoop/authentication)
+
+---
+
+# where is the code?
+
+[github](https://github.com/kirkshoop/GSL/commit/a8c46e58d318158aec5d9c53236428d0ae39703a)
+
+???
+
+> *
 
     </textarea>
     <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
