@@ -301,7 +301,19 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 
 # handling Tweets
 
---
+.center[
+.image-70[
+![robin hood](content/robinhood.gif)
+]
+]
+
+???
+
+> * 
+
+---
+
+# handling Tweets
 
 .accent[__callback per Tweet__
 ]
@@ -351,18 +363,6 @@ that each for loop was reimplementing - often poorly - and ask for the loop to b
 .split-50[
 
 .column[
-.image-80[
-![egg relay](content/Egg_Relay_Race_2015.gif)
-]
-
-.accent[
-]
-
-[https://www.youtube.com/watch?v=JyVSmP-MKgY](https://www.youtube.com/watch?v=JyVSmP-MKgY)
-
-]
-
-.column[
 
 ```
 auto onnext = [&c](int){++c;};
@@ -377,15 +377,16 @@ for (int i = 0; i < 10000000; i++) {
 }
 ```
 
-.accent[**output**
 ]
 
-  - .accent[10,000,000 on_next calls
+.column[
+
+.accent[
 ]
-  - .accent[3018ms elapsed 
-]
-  - .accent[3,313,450 ops/sec
-]
+
+  - 10,000,000 on_next calls
+  - 3018ms elapsed 
+  - .accent[3,313,450] ops/sec
 
 ]
 
@@ -420,16 +421,6 @@ for (int i = 0; i < 10000000; i++) {
 .split-50[
 
 .column[
-.image-80[
-![robin hood](content/robinhood.gif)
-]
-
-.accent[
-]
-
-]
-
-.column[
 
 ```
 auto o = rx::make_subscriber<int>(
@@ -442,22 +433,25 @@ for (int i = 0; i < 10000000; i++) {
 o.on_completed();
 ```
 
-.accent[**output**
+]
+
+.column[
+
+.accent[
 ]
 
 
-  - .accent[10,000,000 on_next calls
-]
-  - .accent[17ms elapsed 
-]
-  - .accent[588,235,000 ops/sec
-]
+  - 10,000,000 on_next calls
+  - 17ms elapsed 
+  - .accent[588,235,000] ops/sec
 
 ]
 
 ]
 
 ???
+
+> * subscriber does contract enforcement
 
 ---
 
@@ -506,13 +500,13 @@ w/o coroutines
     string chunk = partial + *c;
     partial.clear();
     string line;
-    for (auto& chunk : split(chunk, "\r\n")){
-      if (!isEndOfTweet(chunk)) {
-         partial = line = chunk;
+    for (auto& fragment : split(chunk, "\r\n")){
+      if (!isEndOfTweet(fragment)) {
+         partial = line = fragment;
          continue;
       }
       partial.clear();
-      parseline(line, handlers);
+      `parseline`(line, handlers);
     }
   });
 ```
@@ -528,13 +522,13 @@ coroutines
   string chunk = partial + *c;
   partial.clear();
   string line;
-  for (auto& chunk : split(chunk, "\r\n")){
-    if (!isEndOfTweet(chunk)) {
-       partial = line = chunk;
+  for (auto& fragment : split(chunk, "\r\n")){
+    if (!isEndOfTweet(fragment)) {
+       partial = line = fragment;
        continue;
     }
     partial.clear();
-    parseline(line, handlers);
+    `parseline`(line, handlers);
   }
 }
 ```
@@ -548,6 +542,7 @@ coroutines
 > * each will map to for-await
 > * for-await will over-serialize
 > * new promise created for each value
+> * composition requires additional concepts and code
 
 ---
 
@@ -587,10 +582,7 @@ auto tweets = defer([=](){
 ## mentioned callback composition]
 
 - .accent[
-## showed promise overhead]
-
-- .accent[
-## showed subscription efficiency]
+## showed promise and subscription costs]
 
 - .accent[
 ## showed examples of each]
