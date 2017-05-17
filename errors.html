@@ -151,11 +151,11 @@ class: middle
 # some apis that return errors 
 
 ```
-std::error_condition okApiCall(){
-    return std::error_condition{};
+std::error_code okApiCall(){
+    return std::error_code{};
 }
-std::error_condition failApiCall(){
-    return std::make_error_condition(std::errc::io_error);
+std::error_code failApiCall(){
+    return std::errc::io_error;
 }
 ```
 
@@ -259,7 +259,7 @@ e = failApiCall();
 # go BOOM
 
 ```
-unique_error_condition ge;
+unique_error_code ge;
 // default is safe
 
 ge.reset(okApiCall());
@@ -278,7 +278,7 @@ ge.reset(okApiCall());
 # go BOOM
 
 ```
-unique_error_condition ge;
+unique_error_code ge;
 // default is safe
 
 ge.reset(okApiCall());
@@ -296,7 +296,7 @@ ge.reset(okApiCall());
 # no BOOM
 
 ```
-unique_error_condition ge;
+unique_error_code ge;
 // default is safe
 
 ge.reset(okApiCall());
