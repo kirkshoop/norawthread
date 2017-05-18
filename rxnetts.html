@@ -127,7 +127,7 @@
     <textarea id="source">
 
 layout: true
-<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/norawthread/errors.html](https://kirkshoop.github.io/norawthread/errors.html)]</span><span>.center[C++Now 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
+<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/norawthread/rxnetts.html](https://kirkshoop.github.io/norawthread/rxnetts.html)]</span><span>.center[C++Now 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
 
 ---
 
@@ -175,14 +175,13 @@ auto request = "GET / HTTP/1.0\r\n"
                 "Connection: close\r\n\r\n"s;
 
 auto boostorg = `rx_connect`(io_context, host, service) |
-    rxo::map([=] (connected c){
-        return `rx_send`(c, rxs::just(request));
+    rxo::concat_map([=](connected c){
+        return rxs::just(request) | 
+                `rx_send`(c); 
     }) |
-    rxo::concat() |
-    rxo::map([=] (connected c){
+    rxo::concat_map([=](connected c){
         return `rx_read`(c);
     }) |
-    rxo::concat() |
     // share chunks
     rxo::publish() |
     rxo::ref_count();
@@ -289,6 +288,32 @@ close
 
 > *  
 
+---
+
+# echo
+
+```
+auto echo = rx_connect(io_context, host, service) |
+    rxo::concat_map([=](connected c){
+        return rx_read(c) | 
+                rx_send(c); 
+    }) |
+    rxo::subscribe<connected>();
+```
+
+???
+
+> *  
+
+---
+
+# see more of these algorithms
+
+.accent[
+## No raw std::thread! - Live Tweet Analysis in C++]
+
+> * ### friday
+> * ### 2:30pm
 
     </textarea>
     <!--script src="https://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript" >
