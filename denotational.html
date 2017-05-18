@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>errors</title>
+    <title>denotational</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="./fonts.css"/>
     <link rel="stylesheet" href="./mermaid.forest.css">
@@ -142,7 +142,7 @@
     <textarea id="source">
 
 layout: true
-<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/norawthread/errors.html](https://kirkshoop.github.io/norawthread/errors.html)]</span><span>.center[C++Now 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
+<div class="footer"><div class="flexcontainer"><span>.body[[https://kirkshoop.github.io/norawthread/denotational.html](https://kirkshoop.github.io/norawthread/denotational.html)]</span><span>.center[C++Now 2017]</span><span>.body[&copy; 2017 Kirk Shoop ([github](http://github.com/kirkshoop) [twitter](http://twitter.com/kirkshoop))]</span></div></div>
 
 ---
 
@@ -150,262 +150,104 @@ class: middle
 
 .center[
 
-# errors
+# denotational
 
 .accent[
-### forgotten, but not gone]
+]
 
 ]
 
 ???
 
+\(\newcommand{\B}{\mathcal{B}}\)
+\(\newcommand{\E}{\mathcal{E}}\)
+\(\newcommand{\S}{\mathcal{S}}\)
+\(\newcommand{\lb}{\unicode{x27E6}}\)
+\(\newcommand{\rb}{\unicode{x27E7}}\)
+
 > *  
 
 ---
 
-# some apis that return errors 
+.left[
+\(\mu \lb Subscription \rb = \)]
 
-```
-std::error_code okApiCall(){
-    return std::error_code{};
-}
-std::error_code failApiCall(){
-    return std::errc::io_error;
-}
-```
+.left[
+\(\mu \lb Observer \rb = \)]
 
-???
+.left[
+\(\mu \lb Subscriber \rb = \)]
 
-> *
+.left[
+\(\mu \lb Observable \rb = Subscriber \to Subscription\)]
 
 ---
 
-# two wrongs don't make a right
+.left[
+\(\mu \lb Schedulable \rb = \)]
 
-```
-auto e = failApiCall();
-e = failApiCall();
-```
+.left[
+\(\mu \lb Worker \rb = \)]
 
-???
-
-> * errors are ignored by default
-> * exceptions are not ingored by default
+.left[
+\(\mu \lb Scheduler \rb = \)]
 
 ---
 
-# two rights are still wrong
+`$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+0,0 & 100,100 & 200,200 & 300,300 & 400,400\\
+\hline
+\end{array}
+$$`
 
-```
-auto e = okApiCall();
-e = okApiCall();
-```
+`$$
+ListF = 1 + (A \times \_)
+$$`
 
-???
+\(\square x\) "x always holds" \(\leftrightarrow \B\)
+<br/>
+\(\Diamond x\) "x will eventually hold" \(\leftrightarrow \E\)
+<br/>
+\(\S\)
 
-> *
-
----
-
-# Is it a runtime error?
-
-.center[
-.image-60[
-![](content/semiavoid.gif)]]
-
-???
-
-> * unexpected events happen in systems
-
----
-
-# Is it a code bug?
-
-.center[
-.image-60[
-![](content/traincrossing.gif)]]
-
-???
-
-> * flaws in systems should result in a stop and a report
-> * this is intended to ensure that code bugs do not ship
-
----
-class: middle
-
-.center[
-.accent[
-# what should happen if an error is forgotten?]]
-
-???
-
-> *
-
----
-class: middle
-
-.center[
-.accent[
-# how would a forgotten error be detected?]]
-
-???
-
-> *
+`$$
+\E\alpha \equiv \Sigma t' : time.\ \alpha_{t'}
+\\[1em]
+\lb \B \alpha \rb = \lambda time \to \alpha
+\\[1em]
+\square x \equiv \forall t' \in [t, \infty).\ x_{t'}
+\\[1em]
+\B\alpha \equiv \Pi t' : time.\ \alpha_{t'}
+$$`
 
 ---
 
-# errors need to get a life .. time
-
-```
-// begin scope
-auto e = failApiCall();
-// end scope `boom`
-// begin scope
-e = failApiCall();
-// end scope `boom`
-```
-
-???
-
-> *
-
----
-
-# go BOOM
-
-```
-unique_error_code ge;
-// default is safe
-
-ge.reset(okApiCall());
-// unssafe after calling api 
-
-// `boom`
-ge.reset(okApiCall());
-```
-
-???
-
-> *
-
----
-
-# go BOOM
-
-```
-unique_error_code ge;
-// default is safe
-
-ge.reset(okApiCall());
-// unssafe after calling api 
-
-// `boom`
-```
-
-???
-
-> *
-
----
-
-# no BOOM
-
-```
-unique_error_code ge;
-// default is safe
-
-ge.reset(okApiCall());
-// unssafe after calling api 
-
-if (!ge.ok()) {
-    return ge.release();
-}
-// safe once it is checked
-```
-
---
-
-```
-ge.reset(okApiCall());
-// unssafe after calling api 
-
-return ge.release();
-// safe once it is released
-```
-
-???
-
-> *
-
----
-
-# example implementation for a Win32 winerror type
-
-```
-enum class winerror_error : DWORD {};
-
-inline winerror_error winerror_cast(DWORD raw) {
-	return static_cast<winerror_error>(raw);
-}
-
-template<>
-struct error_traits<winerror_error>
-{
-	using value_type = winerror_error;
-
-	static inline winerror_error initiate() {
-		return winerror_cast(ERROR_SUCCESS);
-	}
-
-	static inline bool ok(winerror_error winerror) {
-		return winerror == winerror_cast(ERROR_SUCCESS);
-	}
-};
-
-```
-
----
-
-# example implementation for a Win32 winerror type
-
-```
-using unique_winerror = gsl::unique_error<winerror_error>;
-
-inline unique_winerror make_winerror_if(BOOL is_last_error) {
-	unique_winerror result;
-	if (is_last_error) {
-		return result.reset(GetLastError());
-	}
-	return result;
-}
-```
-
----
-
-# example implementation for a Win32 winerror type
-
-```
-unique_winerror winerror;
-
-PCCERT_CONTEXT certcontext = CertCreateCertificateContext(
-    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-    &key.cert[0],
-    key.cert.size()
-);
-winerror = make_winerror_if(!certcontext);
-
-if (!winerror) {
-    std::wcout << L"could not get cert context" << std::endl; 
-}
-```
-
-[https://github.com/kirkshoop/authentication](https://github.com/kirkshoop/authentication)
-
----
-
-# where is the code?
-
-[github](https://github.com/kirkshoop/GSL/commit/a8c46e58d318158aec5d9c53236428d0ae39703a)
+`$$
+\begin{array}{c}
+\frac{}
+     {\epsilon \in \cdot}
+\\[1em]
+\frac{}
+     { c \in c}
+\\[1em]
+\frac{ w \in r_i \qquad i \in \{1,2\} }
+     { w \in r_1 \vee r_2}
+\\[1em]
+\mbox{(no rule for $w \in \bot$)}
+\\[1em]
+\frac{\exists w_1, w_2.\; w = w_1 \cdot w_2 \qquad 
+              w_1 \in r_1 \qquad 
+              w_2 \in r_2 }
+     {w \in r_1 \cdot r_2}
+\\[1em]
+\frac{\exists w_1, w_2.\; w = w_1 \cdot w_2 \qquad 
+              w_1 \in r \qquad 
+              w_2 \in r* }
+     {w \in r*}
+\end{array}
+$$`
 
 ???
 
@@ -465,10 +307,41 @@ if (!winerror) {
         initMermaid(slideshow.getSlides()[slideshow.getCurrentSlideIndex()]);
 
         MathJax.Hub.Config({
-            displayAlign: "left",
+            jax: ["input/TeX", "output/HTML-CSS"],
+            extensions: [
+                "tex2jax.js",
+                "TeX/AMSmath.js",
+                "TeX/AMSsymbols.js",
+                "TeX/noUndefined.js"],
             tex2jax: {
-                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-                inlineMath: [['$','$'], ['\\(','\\)']]
+                inlineMath: [ ["\\(","\\)"], ["\(","\)"] ],
+                displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+                skipTags: ["script","noscript","style","textarea","pre"],
+                ignoreClass: "tex2jax_ignore",
+                processEscapes: false,
+                processEnvironments: true,
+                preview: "TeX"
+            },
+            showProcessingMessages: true,
+            displayAlign: "left",
+            //displayAlign: "center",
+            displayIndent: "2em",
+
+            "HTML-CSS": {
+                scale: 100,
+                availableFonts: ["STIX","TeX"],
+                preferredFont: "TeX",
+                webFont: "TeX",
+                imageFont: "TeX",
+                showMathMenu: true,
+            },
+            MMLorHTML: {
+                prefer: {
+                    MSIE:    "MML",
+                    Firefox: "MML",
+                    Opera:   "HTML",
+                    other:   "HTML"
+                }
             }
         });
         MathJax.Hub.Configured();
