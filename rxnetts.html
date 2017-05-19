@@ -439,6 +439,9 @@ auto echo = rx_connect(io_context, host, service) |
             initMermaid(slide);
             ga('send', 'pageview', location.pathname + location.search + location.hash);
         });
+        slideshow.on("print", function(slide) {
+            initMermaid(slide);
+        });
         slideshow.on("hideSlide", function(slide) {
             Object.keys(modules).map(k =>  modules[k].ccall('reset', null, [], []));
         });
@@ -449,7 +452,7 @@ auto echo = rx_connect(io_context, host, service) |
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-60804833-3', {'allowAnchor': true});
+  ga('create', 'UA-60804833-4', {'allowAnchor': true});
   ga('send', 'pageview', { 'page': location.pathname + location.search + location.hash });
 </script>
       </body>
