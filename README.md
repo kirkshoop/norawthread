@@ -1,2 +1,2 @@
-# introductionToRxcpp
-remark.js presentation of rxcpp basics
+# norawthread
+remark.js presentation about building a twitter app using rxcpp 
