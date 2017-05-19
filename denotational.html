@@ -170,16 +170,24 @@ class: middle
 ---
 
 .left[
-\(\mu \lb Subscription \rb = \)]
+\\(\mu \lb Event \lt T \gt \rb = ( ListOf \mu \lb T \rb \times time_t ) \\)]
 
 .left[
-\(\mu \lb Observer \rb = \)]
+\\(\mu \lb TerminatingEvent \lt T \gt \rb = Event \lt T \gt \times ( time_e + Error^? ) \\)]
+
+---
 
 .left[
-\(\mu \lb Subscriber \rb = \)]
+\(\mu \lb Subscription \rb = time_l \)]
 
 .left[
-\(\mu \lb Observable \rb = Subscriber \to Subscription\)]
+\\(\mu \lb Observer \lt T \gt \rb = ( ListOf \mu \lb T \rb \times time_t ) \times ( time_e + Error^? ) \\)]
+
+.left[
+\(\mu \lb Subscriber \lt T \gt \rb = Subscription \times Observer \)]
+
+.left[
+\(\mu \lb Observable \lt T \gt \rb = Subscriber \to Subscription\)]
 
 ---
 
