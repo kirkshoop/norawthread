@@ -169,11 +169,40 @@ class: middle
 
 ---
 
-.left[
-\\(\mu \lb Event \lt T \gt \rb = ( ListOf \mu \lb T \rb \times time_t ) \\)]
+__`Event<T>`__ is an infinite list of T values - the never() constructor would return this and it would be used to represent real world measurements like MouseEvents/PointerEvents
 
-.left[
-\\(\mu \lb TerminatingEvent \lt T \gt \rb = Event \lt T \gt \times ( time_e + Error^? ) \\)]
+`$$
+\mu \lb Event \lt T \gt \rb = ( ListOf \mu \lb T \rb \times time_t ) 
+$$`
+
+__`Single<T>`__ is an alternative to `promise` that can be composed with algorithms - Lazy subscribe allows `repeat`, `retry`, cancellation etc.. 
+    
+Single is implemented in RxJava
+
+`$$
+\mu \lb Single \lt T \gt \rb =  (\mu \lb T \rb \times time_t) + (Error \times time_e)
+$$`
+
+__`CompletingEvent<T>`__ allows the full set of algorithms to be implemented
+
+
+`$$
+\mu \lb CompletingEvent \lt T \gt \rb = Event \lt T \gt \times \ Single \lt \gt
+$$`
+
+__Lazy source invocation__ scopes a source to a lifetime - allows `repeat`, `retry`, cancellation, etc..
+
+`$$
+\mu \lb Source \rb = (Event + Single + CompletingEvent)
+$$`
+
+`$$
+\mu \lb Unsubscribe \rb = time_u
+$$`
+
+`$$
+subscribe: (Unsubscribe, Source) \to Source
+$$`
 
 ---
 
@@ -192,13 +221,80 @@ class: middle
 ---
 
 .left[
-\(\mu \lb Schedulable \rb = \)]
+\(\mu \lb Action \rb = time_a \)]
 
 .left[
-\(\mu \lb Worker \rb = \)]
+\(\mu \lb Schedulable \rb = Action \times Subscription \)]
 
 .left[
-\(\mu \lb Scheduler \rb = \)]
+\(\mu \lb Worker \rb = ListOf Schedulable \)]
+
+.left[
+\(\mu \lb Scheduler \rb = ListOf Worker \)]
+
+.left[
+\\(createWorker: Subscription \to Worker \\)]
+
+.left[
+\\(now: () \to time_n \\)]
+
+.left[
+\\(schedule: (time_a, Schedulable) \to Action \\)]
+
+---
+
+# rxcpp architecture
+
+.mermaid[
+classDiagram
+    subscription --o subscriber : 1
+    observer --o subscriber : 1
+    subscription : bool is_subscribed()
+    subscription : void unsubscribe()
+    observer : void on_next(T)
+    observer : void on_error(exception_ptr)
+    observer : void on_completed()
+    subscriber : subscription get_subscription()
+    subscriber : observer get_observer()
+    subscriber : void on_next(T)
+    subscriber : void on_error(exception_ptr)
+    subscriber : void on_completed()
+    subscriber : bool is_subscribed()
+    subscriber : void unsubscribe()
+    observable o-- subscriber : 0..n
+    observable : subscription subscribe(subscriber)
+]
+
+???
+
+> *
+
+---
+
+# rxcpp scheduler architecture
+
+.mermaid[
+classDiagram
+    action --o schedulable : 1
+    subscription --o worker : 1
+    subscription --o schedulable : 1
+    subscription : bool is_subscribed()
+    subscription : void unsubscribe()
+    action : void operator()()
+    schedulable : subscription get_subscription()
+    schedulable : action get_schedulable()
+    scheduler -- worker
+    worker o-- schedulable : 0..n
+    scheduler : time_point now()
+    scheduler : worker create_worker(subscription)
+    worker : scheduler get_scheduler()
+    worker : time_point now()
+    worker : subscription schedule(time_point at, schedulable)
+]
+
+???
+
+> *
 
 ---
 
